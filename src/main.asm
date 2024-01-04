@@ -36,19 +36,16 @@ pohjusta:
 	LDI	REG_MUUT1,HIGH(RAMEND)
 	OUT	SPH,REG_MUUT1
     RCALL sram_alusta
-    ; RCALL sram_alusta_testidatalla
 pohjusta_interrupt:
 ; Aika umpeen
     LDI REG_MUUT1,(1<<COM0A1)|(0<<COM0A0)|(1<<WGM01)
     OUT TCCR0A,REG_MUUT1
     LDI REG_MUUT1,(1<<CS00)|(1<<CS02)|(1<<FOC0A)
     OUT TCCR0B,REG_MUUT1
-    ; LDI REG_MUUT1,0xC0      ; Nopeus
-    LDI REG_MUUT1,0x8F      ; Nopeus
+    LDI REG_MUUT1,0x8F      ; Alkunopeus
     OUT OCR0A,REG_MUUT1
     LDI REG_MUUT1,0x00
     OUT TCNT0,REG_MUUT1
-    ; LDI REG_MUUT1,(1<<TOIE0)
     LDI REG_MUUT1,(1<<OCIE0A)|(1<<TOIE1)
     OUT TIMSK,REG_MUUT1
 ; Toinenkin laskuri käynnissä (satunnaislähde)
@@ -97,7 +94,7 @@ aika_umpeen:
     RJMP aika_umpeen_liiku
     CBR REG_FLAGI,FLAG_SAI_RUOKAA
     RCALL mato_toggle
-    ; IN REG_MUUT1,OCR0A
+    ; IN REG_MUUT1,OCR0A              ; Nopeuta pelin kulkua aina kun syödään
     ; SUB REG_MUUT1,REG_NOPEUTUS
     ; OUT OCR0A,REG_MUUT1
 aika_umpeen_liiku:
@@ -115,23 +112,6 @@ uusi_random:
     INC REG_RAND
     RETI
 
-nappi_muutos:
-    SBIS PINB,PIN_NAPPI                ; Napin suunta takaisin ylös
-    RETI
-    SBRC REG_FLAGI,FLIND_MATO_KUOLLUT  ; Mato on kuollut
-    RETI
-    SBRC REG_FLAGI,FLIND_VAIHDETTU     ; Suuntaa on jo vaihdettu tikkausta varten
-    RETI
-    CLI
-    SBR REG_FLAGI,FLAG_VAIHDETTU       ; Ei toista suunnanvaihdosta ennen seuraavaa ruutua
-    MOV REG_MUUT1,REG_MATOSTATUS
-    LDI REG_MUUT2,1<<6
-    ADD REG_MUUT1,REG_MUUT2
-    CBR REG_MUUT1,0x3F                 ; Nollaa pituusosa
-    CBR REG_MATOSTATUS,0xC0            ; Nollaa suunta
-    OR REG_MATOSTATUS,REG_MUUT1        ; Yhdistä
-    SEI
-    RETI
 
 nappi_ov_muutos:
     SBRC REG_FLAGI,FLIND_MATO_KUOLLUT  ; Mato on kuollut
