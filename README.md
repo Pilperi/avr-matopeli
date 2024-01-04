@@ -55,3 +55,9 @@ Liittyy osittain aiemmin mainittuun satunnaislukuhommaan. Yksi alkuvaiheen toteu
 Tässä kävi kuitenkin niin, että joskus laskuri meni täyteen just kun näyttöä oltiin päivittämässä, ja koko homma meni ihan plörinäksi.
 Siksi `main.asm` ruuduntäyttölooppi on ympäröity `CLI`/`SEI` ohjeistuksilla, eli kaikki interruptit pistetään näytön päivittämisen ajaksi pois päältä.
 Aiemmissa projekteissa interrupteja on ollut joko tasan yksi kipale tai vähintään ne on ollu jotenkin järkevästi keskenään synkassa, eikä tämmösiä tarvinnu miettiä.
+
+### Rytmipelisyys
+Valituista ratkaisuista seuraa sellainen ikävä piirre että madon ohjaaminen on paitsi epäintuitiivista, myös vähän rytmipelistä: Madon suuntaa kun voi vaihtaa vain kerran per näytön päivitys.
+Tämä johtuu ihan siitä, että ohjaussysteemi on tosiaan suunnan kasvattamista tai vähentämistä. Jos suuntaa kasvatettaisiin kahdesti ennen kuin mato on liikkunut seuraavaan pisteeseen, se olisi kääntynyt 180 astetta eli liikkuisi itseensä päin ja kuolisi.
+Sekään ei oikein käy että näyttöä päivitettäisiin aina kun suuntaa vaihdetaan, koska silloin liikenopeudet menisi ihan ihmeellisiksi.
+Tämä olisi asia joka korjaantuisi sillä että olisi neljä nappia ja voitaisiin katsoa onko valitussa suunnassa mitään järkeä, eikä tarttisi pitää kirjaa onko madon suuntaa vaihdettu tällä tikkauksella vai ei.
