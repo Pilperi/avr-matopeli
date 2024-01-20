@@ -44,6 +44,11 @@ mato_init:
 ; laskurirekisteristä, ja etsimällä siitä lähin ei-täytetty piste
 mato_aseta_ruoka:
     MOV REG_PISTE,REG_RAND
+    LDI REG_MUUT1,PIX_RIVI7  ; Ei seiskariviä
+    EOR REG_PISTE,REG_MUUT1
+    LDI REG_MUUT1,PIX_RIVI1
+    SBRS REG_PISTE,5         ; Jos nollarivi, hypätään 1
+    ADD REG_PISTE,REG_MUUT1
 _mato_aseta_ruoka_loop:
     INC REG_PISTE
     RCALL sram_tarkista_pikseli
