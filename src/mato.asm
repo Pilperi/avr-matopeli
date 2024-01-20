@@ -18,11 +18,15 @@
 .equ FLIND_PISTE_RUOKAA  = 2
 .equ FLIND_VAIHDETTU     = 3
 .equ FLIND_SAI_RUOKAA    = 4
+.equ FLIND_VAARA         = 5
+.equ FLIND_ARMOA_ANNETTU = 6
 .equ FLAG_MATO_KUOLLUT   = 1<<FLIND_MATO_KUOLLUT
 .equ FLAG_PISTE_TAYTETTY = 1<<FLIND_PISTE_TAYTETTY
 .equ FLAG_PISTE_RUOKAA   = 1<<FLIND_PISTE_RUOKAA
 .equ FLAG_VAIHDETTU      = 1<<FLIND_VAIHDETTU
 .equ FLAG_SAI_RUOKAA     = 1<<FLIND_SAI_RUOKAA
+.equ FLAG_VAARA          = 1<<FLIND_VAARA
+.equ FLAG_ARMOA_ANNETTU  = 1<<FLIND_ARMOA_ANNETTU
 
 
 ; Alusta mato.
@@ -83,7 +87,8 @@ _mato_liiku_ylos:
     ADD REG_ARG0,REG_MUUT1
 _mato_liiku_piste_selvilla:
     RCALL mato_tarkista_kuolema       ; Tarkista kuoleeko tai kasvaako mato
-    RCALL mato_paivita_datat          ; Päivitä madon muistialue
+    SBRS REG_FLAGI,FLIND_MATO_KUOLLUT ; Jos ei kuolla,päivitä madon muistialue
+    RCALL mato_paivita_datat
     POP REG_ARG0
     RET
 
@@ -91,17 +96,24 @@ _mato_liiku_piste_selvilla:
 ; Tarkista kuoleeko mato liikkeestä
 ; eli onko seuraava piste (ARG0) ei-ruoka päällä oleva pikseli
 mato_tarkista_kuolema:
-    CBR REG_FLAGI,FLAG_MATO_KUOLLUT     ; Oletettavasti elossa
+    ; CBR REG_FLAGI,FLAG_MATO_KUOLLUT     ; Oletettavasti elossa
     MOV REG_PISTE,REG_ARG0
     RCALL sram_tarkista_pikseli
     SBRS REG_FLAGI,FLIND_PISTE_TAYTETTY ; Jos pistettä ei ole täytetty, ei voi kuolla
     RET
     CPSE REG_PISTE,REG_RUOKAPISTE       ; Jos ruokapiste, kaikki on ok
-    RJMP tapa_mato
+    RJMP mato_tarkista_kuolema_vaarassa
+    CBR REG_FLAGI,FLAG_VAARA            ; Jos oli vaarassa, ei ole enää
     SBR REG_FLAGI,FLAG_PISTE_RUOKAA
     RCALL mato_aseta_ruoka              ; Uusi ruokapiste
     RET
-tapa_mato:
+mato_tarkista_kuolema_vaarassa:
+    SBRC REG_FLAGI,FLIND_VAARA          ; Aika kuolla, olit jo vaarassa
+    RJMP mato_tarkista_kuolema_tapa_mato
+    SBR REG_FLAGI,FLAG_VAARA
+    RET
+mato_tarkista_kuolema_tapa_mato:
+    CBR REG_FLAGI,FLAG_VAARA            ; Vaara on lievä termi
     SBR REG_FLAGI,FLAG_MATO_KUOLLUT
     RET
 

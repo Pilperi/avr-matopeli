@@ -24,8 +24,6 @@ RETI               ; USI_OVF
 pohjusta:
     LDI REG_MUUT1,0x00
     MOV REG_FLAGI,REG_MUUT1
-    LDI REG_MUUT1,1
-    MOV REG_NOPEUTUS,REG_MUUT1
     LDI REG_MUUT1,0xAA
     MOV REG_RAND,REG_MUUT1
     LDI REG_MUUT1,0x00
@@ -88,18 +86,22 @@ vapauta_spi:
 
 aika_umpeen:
     CLI
+    CBR REG_FLAGI,FLAG_VAIHDETTU       ; Voi taas vaihtaa suuntaa
     SBRC REG_FLAGI,FLIND_MATO_KUOLLUT
     RJMP aika_umpeen_vilauta_matoa
+    SBRC REG_FLAGI,FLIND_VAARA         ; Törmäysvaarassa annetaan yksi freimi armoa
+    RJMP aika_umpeen_armofreimi
     SBRS REG_FLAGI,FLIND_SAI_RUOKAA    ; Laitettu pois päältä ruoan takia
     RJMP aika_umpeen_liiku
     CBR REG_FLAGI,FLAG_SAI_RUOKAA
     RCALL mato_toggle
-    ; IN REG_MUUT1,OCR0A              ; Nopeuta pelin kulkua aina kun syödään
-    ; SUB REG_MUUT1,REG_NOPEUTUS
-    ; OUT OCR0A,REG_MUUT1
+aika_umpeen_armofreimi:
+    SBRC REG_FLAGI,FLIND_ARMOA_ANNETTU  ; Armoa on jo annettu, aika liikkua
+    RJMP aika_umpeen_liiku
+    SBR REG_FLAGI,FLAG_ARMOA_ANNETTU    ; Merkataan että armoa on annettu
+    RJMP aika_umpeen_valmis             ; muttei liikuta
 aika_umpeen_liiku:
     RCALL mato_liiku
-    CBR REG_FLAGI,FLAG_VAIHDETTU       ; Voi taas vaihtaa suuntaa
     RJMP aika_umpeen_valmis
 aika_umpeen_vilauta_matoa:
     RCALL mato_toggle
