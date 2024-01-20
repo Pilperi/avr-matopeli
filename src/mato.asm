@@ -90,7 +90,8 @@ _mato_liiku_ylos:
     ADD REG_ARG0,REG_MUUT1
 _mato_liiku_piste_selvilla:
     RCALL mato_tarkista_kuolema       ; Tarkista kuoleeko tai kasvaako mato
-    SBRS REG_FLAGI,FLIND_MATO_KUOLLUT ; Jos ei kuolla,päivitä madon muistialue
+    SBRC REG_FLAGI,FLIND_VAARA        ; Jos ei kuolla,päivitä madon muistialue
+    RCALL mato_tarkista_kuolema_tapa_mato
     RCALL mato_paivita_datat
     POP REG_ARG0
     RET
