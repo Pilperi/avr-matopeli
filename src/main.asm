@@ -117,7 +117,6 @@ uusi_random:
 
 nappi_ov_muutos:
     SBRC REG_FLAGI,FLIND_MATO_KUOLLUT  ; Mato on kuollut
-    ; RETI
     RJMP pohjusta
     SBRC REG_FLAGI,FLIND_VAIHDETTU     ; Suuntaa on jo vaihdettu tikkausta varten
     RETI

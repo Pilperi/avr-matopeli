@@ -4,6 +4,7 @@
 
 .equ KENNOJA = 4
 .equ RIVEJA_KENNOSSA = 8
+.equ VAPAITA_RIVEJA = 7+8+8+7
 .equ RIVEJA = 36
 
 ; Pikselin koordinaattimääritelmät
@@ -93,6 +94,32 @@ sram_alusta:
     STS DAT_KENNO0+7, REG_MUUT1
     RET
 
+; Alusta madon pikselidatat
+sram_alusta_matodatat:
+    ; Alkupiste
+    LDI REG_PISTE,MADON_ALKUPAIKKA
+    STS DAT_MATO,REG_PISTE
+    RCALL sram_vaihda_pikseli
+    ; Nelosrivi täyteen
+    DEC REG_PISTE
+    LDI XL,LOW(DAT_MATO+1)
+    LDI XH,HIGH(DAT_MATO+1)
+    LDI REG_LOOP1,MADON_ALKUPITUUS-1
+_loop_sram_alusta_matodatat1:
+    ST X+,REG_PISTE
+    PUSH REG_LOOP1
+    PUSH XH
+    PUSH XL
+    RCALL sram_vaihda_pikseli
+    POP XL
+    POP XH
+    POP REG_LOOP1
+    DEC REG_PISTE
+    DEC REG_LOOP1
+    BRNE _loop_sram_alusta_matodatat1
+    RET
+
+    
 
 ; Hae pikselin REG_PISTE muistiosoite
 ; ja aseta se REG_OSOITE_L/H arvoksi

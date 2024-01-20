@@ -2,9 +2,8 @@
 .ifndef MATO
 .equ MATO=0
 
-
 ; Matostatuksen rakenne
-; Suunta/4 |    pituus/180     |
+; Suunta/4 |    RESERVED       |
 ;  S1 S0   | P5 P4 P3 P2 P1 P0 |
 .equ MATO_SUUNTA_OIKEA  = 0<<6
 .equ MATO_SUUNTA_ALAS   = 1<<6
@@ -28,17 +27,16 @@
 .equ FLAG_VAARA          = 1<<FLIND_VAARA
 .equ FLAG_ARMOA_ANNETTU  = 1<<FLIND_ARMOA_ANNETTU
 
+.equ MADON_ALKUPAIKKA = PIX_KENNO1|PIX_SARAKE4|PIX_RIVI3
+.equ MADON_ALKUPITUUS = 2
+.equ MADON_ALKUSUUNTA = MATO_SUUNTA_YLOS
 
 ; Alusta mato.
 ; ykköskennon keskellä, kahden pituinen, menossa alaspäin
 mato_init:
-    LDI REG_MATOSTATUS,(MATO_SUUNTA_YLOS|(2<<0))
-    LDI REG_PISTE,PIX_KENNO0|PIX_SARAKE5|PIX_RIVI3
-    RCALL sram_vaihda_pikseli
-    STS DAT_MATO,REG_PISTE
-    LDI REG_PISTE,PIX_KENNO0|PIX_SARAKE4|PIX_RIVI3
-    RCALL sram_vaihda_pikseli
-    STS DAT_MATO+1,REG_PISTE
+    LDI REG_MATOSTATUS,MADON_ALKUSUUNTA
+    LDI REG_PITUUS,MADON_ALKUPITUUS
+    RCALL sram_alusta_matodatat
     RET
 
 
@@ -96,7 +94,6 @@ _mato_liiku_piste_selvilla:
 ; Tarkista kuoleeko mato liikkeestä
 ; eli onko seuraava piste (ARG0) ei-ruoka päällä oleva pikseli
 mato_tarkista_kuolema:
-    ; CBR REG_FLAGI,FLAG_MATO_KUOLLUT     ; Oletettavasti elossa
     MOV REG_PISTE,REG_ARG0
     RCALL sram_tarkista_pikseli
     SBRS REG_FLAGI,FLIND_PISTE_TAYTETTY ; Jos pistettä ei ole täytetty, ei voi kuolla
@@ -123,8 +120,7 @@ mato_toggle:
     PUSH XL
     PUSH XH
     LDI REG_LOOP1,0
-    MOV REG_LOOP2,REG_MATOSTATUS
-    CBR REG_LOOP2,0xC0
+    MOV REG_LOOP2,REG_PITUUS
     LDI XL,LOW(DAT_MATO)
     LDI XH,HIGH(DAT_MATO)
 _mato_toggle_loop:
@@ -149,8 +145,7 @@ mato_paivita_datat:
     PUSH XH
     LDI XL,LOW(DAT_MATO)
     LDI XH,HIGH(DAT_MATO)
-    MOV REG_LOOP1,REG_MATOSTATUS     ; Madon pituus
-    CBR REG_LOOP1,0xC0
+    MOV REG_LOOP1,REG_PITUUS         ; Madon pituus
     DEC REG_LOOP1
     ADD XL,REG_LOOP1
     ADC XH,REG_NOLLA
@@ -164,7 +159,7 @@ mato_paivita_datat:
     POP REG_LOOP1
     RJMP _mato_paivita_datat_loop
 _mato_paivita_datat_kasvata_matoa:   ; Vanha loppupää yhden kauemmas
-    INC REG_MATOSTATUS
+    INC REG_PITUUS
     INC XL
     ADC XH,REG_NOLLA
     ST X,REG_PISTE

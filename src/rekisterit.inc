@@ -22,7 +22,7 @@
 
 .def REG_FLAGI       = R22           ; Erinäiset statusflagit
 .def REG_MATOSTATUS  = R23           ; Madon status
-.def REG_SEURSUUNTA  = R24           ; Seuraava suunta
+.def REG_PITUUS      = R24           ; Madon pituus
 .def REG_RUOKAPISTE  = R25           ; Ruoan sijainti
 
 ;-------------------------------------------------------------------------------
