@@ -5,8 +5,9 @@
 ;-------------------------------------------------------------------------------
 ; 0-15
 
-.def REG_SUUNTAVARA  = R13           ; Kellotikkauksen aikana kaksi klikkausta
-.def REG_RAND        = R14           ; Satunnaisnumero
+.def REG_RAND        = R12           ; Satunnaisluku
+.def REG_RANDADD     = R13           ; Seuraava satunnaisluku tämä ynnäämällä
+.def REG_SUUNTAVARA  = R14           ; Kellotikkauksen aikana kaksi klikkausta
 .def REG_NOLLA       = R15           ; Aina nolla
 
 ;-------------------------------------------------------------------------------

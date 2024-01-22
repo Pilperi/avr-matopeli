@@ -22,18 +22,16 @@ RETI               ; USI_OVF
 
 ; Pohjustus: stack pointteri kohdilleen, aseta väylä kolmipiuhaksi
 pohjusta:
+    ; Pseudosatunnaisgeneraattoriluku
+    LDI REG_MUUT1,(PIX_SARAKE3 | PIX_SARAKE1 | PIX_RIVI5)
+    MOV REG_RANDADD,REG_MUUT1
+    ; Satunnainen luku alkaa summaluvusta
     LDI REG_MUUT1,0x00
-    MOV REG_FLAGI,REG_MUUT1
-    LDI REG_MUUT1,0xAA
     MOV REG_RAND,REG_MUUT1
-    LDI REG_MUUT1,0x00
-    MOV REG_NOLLA,REG_MUUT1
-    LDI REG_PISTE,0x00
     LDI	REG_MUUT1,LOW(RAMEND)     ; Stack pointer kohdilleen
 	OUT	SPL,REG_MUUT1
 	LDI	REG_MUUT1,HIGH(RAMEND)
 	OUT	SPH,REG_MUUT1
-    RCALL sram_alusta
 pohjusta_interrupt:
 ; Aika umpeen
     LDI REG_MUUT1,(1<<COM0A1)|(0<<COM0A0)|(1<<WGM01)
@@ -49,6 +47,14 @@ pohjusta_interrupt:
 ; Toinenkin laskuri käynnissä (satunnaislähde)
     LDI REG_MUUT1,(0<<CS13)|(0<<CS12)|(0<<CS11)|(1<<CS10) ; Täyttä hönkää
     OUT TCCR1,REG_MUUT1
+aloita_peli:
+    RCALL sram_alusta
+    ; Flagit: ei ole kuollut jne
+    LDI REG_MUUT1,0x00
+    MOV REG_FLAGI,REG_MUUT1
+    LDI REG_MUUT1,0x00
+    MOV REG_NOLLA,REG_MUUT1
+    LDI REG_PISTE,0x00
 pohjusta_max:
     RCALL aseta_spi
     RCALL max7219_init
@@ -111,13 +117,13 @@ aika_umpeen_valmis:
 
 
 uusi_random:
-    INC REG_RAND
+    ADD REG_RAND,REG_RANDADD
     RETI
 
 
 nappi_ov_muutos:
     SBRC REG_FLAGI,FLIND_MATO_KUOLLUT  ; Mato on kuollut
-    RJMP pohjusta
+    RJMP aloita_peli
     SBRC REG_FLAGI,FLIND_VAIHDETTU     ; Suuntaa on jo vaihdettu tikkausta varten
     RETI
     CLI
